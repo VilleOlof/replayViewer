@@ -1,0 +1,92 @@
+<!--Dont question it.-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Replay Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/src/main.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+
+    <!--Dont think i use this but the site wont start unless i include this here soooooo-->
+    <script type="importmap"> {
+        "imports": {
+            "three": "../node_modules/three/build/three.module.js"
+        } }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from '../node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+
+        const renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 10000 );
+        const loader = new GLTFLoader();
+        const scene = new THREE.Scene();
+
+        window.addEventListener('resize', function onWindowResize(){
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+		}, false);
+        
+
+        camera.position.z = 50;
+        camera.position.y = 7;
+
+		scene.add(new THREE.HemisphereLight( 0xFFFFFF, 0x080820, 3 ));
+        //make the background transparent
+        renderer.setClearColor( 0x000000, 0 );
+
+        //whats a good background color?
+        renderer.setClearColor( 0x72bcc9, 1 );
+
+        loader.load('../resources/maxwell.glb', function (gltf) {
+            scene.add(gltf.scene);
+        }, undefined, function (error) {
+            console.error(error);
+        });
+
+        //add a song to the background
+        const listener = new THREE.AudioListener();
+		camera.add(listener);
+		// create a global audio source
+		const sound = new THREE.Audio( listener );
+		// load a sound and set it as the Audio object's buffer
+		const audioLoader = new THREE.AudioLoader();
+        audioLoader.load( '../resources/maxwell.mp3', function( buffer ) {
+            sound.setBuffer( buffer );
+            sound.setLoop( true );
+            sound.setVolume( 0.2 );
+        });
+
+        var body = document.getElementsByTagName("body")[0];
+        body.addEventListener("click", StartMusic);
+
+        function render() {
+            renderer.render(scene, camera);
+
+            //make the model rotate
+            scene.rotation.y += 0.01;
+
+
+            requestAnimationFrame(render);
+        }
+
+        requestAnimationFrame(render);
+
+        function StartMusic() {
+            if (sound.isPlaying) return;
+            sound.play();
+        }
+
+    </script>
+</head>
+<body style="background-color:#72bcc9;overflow-y: hidden;overflow-x: hidden;">
+    <p style="align-items: center;font-size: 10rem;font-weight: bold;padding:0;margin:0;text-align: center;font-family:Source Sans Pro;">404 - Not Found</p>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Replay Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/src/main.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../resources/favicon.png">
+
+    <!--Dont think i use this but the site wont start unless i include this here soooooo-->
+    <script type="importmap"> {
+        "imports": {
+            "three": "../node_modules/three/build/three.module.js"
+        } }
+    </script>
+
+    <script src="./ThreeModule.js" type="module"></script>
+    <script src="./main.js" type="module"></script>
+</head>
+<body>
+    <div class="flex">
+        <div class="canvas"><canvas id="canvas"></canvas>
+
+            <div style="display: flex;padding:0;margin:0;height:8rem;">
+                <div style="flex-grow: 1;padding:0.5rem;display: flex;flex-direction: column;">
+                    <div style="display:flex;align-items: center;">
+                        <input type="range" style="flex-grow: 1;margin-bottom: 0.5rem;" min="0" max="1" step="0.00001" value="0" class="timeline" id="timeline_slider">
+                        <div style="width:16rem">
+                            <p class="advanced_label" style="display: inline-block;font-size: 2vh;margin:0">Play/Stop:</p><button id="timeline_playStop" class="optionButtons" style="font-size: 2vh;width:3.75rem;height:2.25rem">Play</button><br>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;align-items: flex-end;width:100%;">
+                        <div style="display:flex;flex-grow:1;align-items: center;margin-top: 1rem;">
+                            <p class="advanced_label" style="display: block;margin-right: 2rem;padding-left: 0.5;flex-grow: 0;flex-shrink: 0;margin:0;margin-right:0.5rem">Playback Speed:</p><input type="range" class="timelinePlayback" style="flex-grow: 1;display: block;flex-shrink: 1;" list="timeline_ticks" min="-2" max="2" step="0.001" value="0" id="timeline_speed">
+                            <datalist id="timeline_ticks">
+                                <option value="-2">
+                                <option value="0">
+                                <option value="2">
+                            </datalist>
+                        </div>
+                        <div style="width:16rem">
+                            <button id="ui_playback_reset" style="margin-left: 1.6rem;"><img src="../resources/resest.png" class="reset-button-icon" style="position: relative;top: 0rem;"></img></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex;margin-top:1.5rem;width:18rem;justify-content: flex-end;flex-direction: column;">
+                    <p class="advanced_label" style="font-size:3.75rem;padding:0.25rem;margin:0;text-align: right;" id="ui_time">00:00.000</p>
+                    <p class="advanced_label_desc">RTA (May Be Slightly Inaccurate)</p>
+                    <br>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="sidebar ">
+
+            <img src="../resources/logo.png" class="topimage"></img>
+
+            <div>
+                <button id="main_tab_button" class="header mainbutton"><b>Main</b></button><button id="other_tab_button" class="header mainbutton"><b>Misc.</b></button>
+
+                <div id="main_tab">
+                    <div style="padding:10px">
+                        <div class="flexit">
+
+                            <input id="level" value="Learning to Roll" placeholder="Level" list="level_list" style="width: 50%;height: 2rem;" class="paddit">
+                            <datalist id="level_list"></datalist>
+
+                        </div>
+                        <div class="flexit paddit">
+
+                            <select id="platform" style="height: 2rem;margin-right:0.5rem">
+                                <option>Global</option>
+                                <option>Steam™</option>
+                                <option>Switch™</option>
+                                <option>Custom™</option>
+                            </select>
+
+                            <input value="50" placeholder="Limit" min="1" id="limit" type="number" style="width: 15%; height: 1.5rem;" class="paddit">
+                            <input value="0" placeholder="Skip" min="0" id="skip" type="number" style="width: 15%; height: 1.5rem;" class="paddit">
+                        </div>
+                        <br>
+                        <div class="flexit">
+                            <button id="go_button" class="header mainbutton go"><b>GO</b></button>
+                        </div>
+
+                    </div>
+
+                    <div style="padding:10px" >
+                        <p class="leaderboard_header"><b>Leaderboard</b></p>
+
+                        <div class="bottom">
+                            <table id="leaderboard">
+                                <tr>
+                                  <th>Rank</th>
+                                  <th>Username</th>
+                                  <th>Time</th>
+                                </tr>
+                              </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="other_tab" hidden style="overflow:auto;height:78.5vh">
+
+                    <p class="advanced_label">Line Colors <input id="ui_lineToggle" style="margin-left: 4rem;" type="checkbox">Toggle Lines</input></p>
+                    <p class="advanced_label_desc">Fastest, Slowest</p>
+                    <div class="advanced_label">
+                        <input id="ui_startColor" type="color" value="#ff00f2" class="colorpickers">
+                        <input id="ui_endColor" type="color" value="#50FF00" class="colorpickers">
+                        <button id="ui_reset_color" ><img src="../resources/resest.png" class="reset-button-icon" style="position: relative;top: 0rem;"></img></button>
+                    </div>
+
+                    <p class="advanced_label">UpdateInterval</p>
+                    <p class="advanced_label_desc">Higher Means "Laggier" Replays But Higher FPS</p>
+                    <div class="advanced_label" >
+                        <input id="ui_updateInterval" type="number" value="15" class="colorpickers" style="width:4rem;padding-left: 2%;">
+                        <button id="ui_reset_updateInterval"><img src="../resources/resest.png" class="reset-button-icon"></img></button>
+                    </div>
+
+                    <p class="advanced_label">Follow Distance</p>
+                    <p class="advanced_label_desc">The Max Camera Distance From The Marble You're Spectacting</p>
+                    <div class="advanced_label">
+                        <input id="ui_cameraMaxDistance" type="number" value="40" class="colorpickers" style="width:4rem;padding-left: 2%;"><input id="ui_followMarbleToggle" checked type="checkbox">Toggle Follow</input>
+                        <button id="ui_reset_cameraMaxDistance"><img src="../resources/resest.png" style="padding-left: 1rem;" class="reset-button-icon"></img></button>
+                    </div>
+
+                    <p class="advanced_label">Camera FOV</p>
+                    <p class="advanced_label_desc">The Camera Field Of View</p>
+                    <p id="currentFOV_label" class="advanced_label_desc">Current FOV: 45</p>
+                    <div class="advanced_label">
+                        <input id="ui_cameraFOV" list="defaultFOVValue" type="range" min="1" max="150" step=1" value="45" class="sliderFOV">
+                        <datalist id="defaultFOVValue">
+                            <option value="45" label="Default">
+                            <option value="1" label="1">
+                            <option value="150" label="150">
+                        </datalist>
+                    </div>
+
+                    <p class="advanced_label">Marble Texture</p>
+                    <p class="advanced_label_desc">The Marble Texture (Formats: PNG, JPG, MP4, WEBM)</p>
+                    <div class="advanced_label">
+                        <input id="ui_marbleTexture" type="file" accept=".png, .jpg, .mp4, .webm" name="marble_texture" class="fileUpload">
+                        <button id="ui_reset_marbleTexture"><img src="../resources/resest.png" style="padding-left: 1rem;" class="reset-button-icon"></img></button>
+                    </div>
+
+                    <p class="advanced_label">Marble Transparency Target</p>
+                    <p class="advanced_label_desc">Decides How The Transparency Is Applied</p>
+                    <div class="advanced_label">
+                        <select id="ui_marbleTransparencyTarget" value="All Marbles" class="colorpickers" style="width:18rem;padding-left: 2%;font-size: 1.1rem;">
+                            <option>All Marbles</option>
+                            <option>All Except The Following Marble</option>
+                            <option>No Marbles</option>
+                        </select>
+                    </div>
+
+                    <p class="advanced_label">Marble Transparency</p>
+                    <p class="advanced_label_desc">The Marble Material Transparency</p>
+                    <div class="advanced_label">
+                        <input id="ui_marbleTransparency" list="marbleTransparencyDefaults" type="range" min="0" max="1" step="0.01" value="1" class="sliderFOV">
+                        <datalist id="marbleTransparencyDefaults">
+                            <option value="1" label="1">
+                            <option value="0.5" label="0.5">
+                            <option value="0" label="0">
+                    </div>
+
+                    <div>
+                        <p class="advanced_label" style="display: inline-block;">Enable FPS Panel</p><button id="ui_enableFPS" class="optionButtons">Off</button>
+                        <p class="advanced_label" style="display: inline-block;">Enable Debug</p><button id="ui_enableDebug" class="optionButtons">Off</button>
+                    </div>
+
+                    <p class="advanced_label">Information ⇩</p>
+
+                    <p class="advanced_label_desc">
+                        This is a project by <b>VilleOlof</b><br>
+                        if you have any questions or suggestions<br>
+                        feel free to contact me on Discord: <i>VilleOlof#2189</i><br>
+                        <br>
+                        <b>With Help From:</b><br>
+                        Maxboxx - Programming Help<br>
+                        MagesIGuess - Programming Help<br>
+                        ReeZey - Programming Help & CSS Styling<br>
+                        Catzs - Level Textures<br>
+                        Anson - Marble Texture<br>
+                        <br>
+                        Level Models & Replay Data From Marble It Up!<br>
+                        Play <a target=”_blank” style="color:rgb(125, 161, 240);" href="https://store.steampowered.com/app/864060/Marble_It_Up/">Marble It Up!</a> On Steam<br>
+                        <br>
+                        Data was last updated: <b>2023-01-26 ~</b><br>
+                        Replay Version: <b>1.0.0</b><br>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

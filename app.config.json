@@ -1,0 +1,4 @@
+{
+    "serverAdress": "http://192.168.88.133:6969/resources/",
+    "ManualLimitPerRequest": 500
+}
